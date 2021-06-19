@@ -70,6 +70,10 @@ pub use crate::message::*;
 mod notification;
 pub use crate::notification::*;
 mod client;
+mod android;
+mod apns;
+mod webpush;
+
 pub use crate::client::*;
 
 pub use crate::client::response::FcmError as Error;

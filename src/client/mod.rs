@@ -14,16 +14,18 @@ use serde_json;
 
 /// An async client for sending the notification payload.
 pub struct Client {
+    app_id: String,
     http_client: HttpClient<HttpsConnector<HttpConnector>>,
 }
 
 impl Client {
     /// Get a new instance of Client.
-    pub fn new() -> Client {
+    pub fn new(app_id: String) -> Client {
         let mut http_client = HttpClient::builder();
         http_client.pool_max_idle_per_host(std::usize::MAX);
 
         Client {
+            app_id,
             http_client: http_client.build(HttpsConnector::new()),
         }
     }
@@ -39,8 +41,8 @@ impl Client {
                 CONTENT_LENGTH,
                 format!("{}", payload.len() as u64).as_bytes(),
             )
-            .header(AUTHORIZATION, format!("key={}", message.api_key).as_bytes())
-            .uri("https://fcm.googleapis.com/fcm/send");
+            .header(AUTHORIZATION, format!("Bearer {}", message.access_token).as_bytes())
+            .uri(format!("https://fcm.googleapis.com/v1/projects/{}/messages:send", self.app_id));
 
         let request = builder.body(Body::from(payload)).unwrap();
         let requesting = self.http_client.request(request);
